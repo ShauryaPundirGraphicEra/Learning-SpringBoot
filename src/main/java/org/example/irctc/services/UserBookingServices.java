@@ -1,4 +1,5 @@
 package org.example.irctc.services;
+import org.example.irctc.entities.Train;
 import org.example.irctc.util.UserServiceUtil;
 import org.example.irctc.exception.UserFoundException;
 
@@ -122,6 +123,14 @@ public class UserBookingServices {
       }catch (IOException e){
           return Boolean.FALSE;
       }
+    }
+
+    public List<Train> getTrains(String source,String destination){
+        try{
+           return trainService.searchTrains(source,destination);
+        }catch(Exception e){
+
+        }
     }
 
 

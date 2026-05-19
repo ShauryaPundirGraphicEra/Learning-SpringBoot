@@ -30,6 +30,13 @@ public class User {
         this.password=password;
         this.hashedPassword=hashedPassword;
     }
+    //for login
+    public User(String userName,String password,String hashedPassword){
+        this.name=userName;
+        this.password=password;
+        this.hashedPassword=hashedPassword;
+    }
+
     public User(){}
 
     public void printTickets(){

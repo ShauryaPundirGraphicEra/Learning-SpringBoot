@@ -1,5 +1,6 @@
 package org.example.irctc;
 
+import org.example.irctc.entities.Train;
 import org.example.irctc.entities.User;
 import org.example.irctc.exception.UserFoundException;
 import org.example.irctc.services.UserBookingServices;
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -54,11 +56,35 @@ public class IrctcApplication {
 				try{
                     userBookingServices.signUp(newUser);
                 }catch (UserFoundException e){
-                    System.out.println("Similar User was found");
+                    System.out.println("User cant be created !");
                 }
                 break;
 			case 2:
+				System.out.println("Enter username to Login!");
+				String nameToLogin=sc.next();
+				System.out.println("Enter the password :");
+				String passwordToLogin=sc.next();
+				User userToLogin=new User(nameToLogin,passwordToLogin,
+						UserServiceUtil.hashPassword(passwordToLogin));
+				try{
+					userBookingServices=new UserBookingServices(userToLogin);
+				} catch (IOException e) {
+					System.out.println("Something error happedppedne in Login");
+					return;
+				}
 				break;
+			case 3:
+				System.out.println("Fetching your Booking");
+				userBookingServices.fetchBooking();
+				break;
+			case 4:
+				System.out.println("Enter ur start / source station");
+				String source=sc.next();
+				System.out.println("Enter ur destination ");
+				String destination=sc.next();
+				List<Train> trains=userBookingServices.getTrains(source,destination);
+
+
 		}
 
 
