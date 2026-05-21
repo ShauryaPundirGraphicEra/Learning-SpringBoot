@@ -1,6 +1,6 @@
 [
   {
-    "train_id": "bacs",
+    "train_id": "INR21344",
     "train_no": 12345,
     "seats": [
       [0,0,0,0,0,0],
@@ -20,8 +20,8 @@
     ]
   },
   {
-    "train_id": "bacs",
-    "train_no": 12345,
+    "train_id": "INR23001",
+    "train_no": 13345,
     "seats": [
       [0,0,0,0,0,0],
       [0,0,0,0,0,0],
@@ -29,13 +29,13 @@
       [0,0,0,0,0,0]
     ],
     "station_times": {
-      "bangalore": "13:50:00",
-      "jaipur": "13:50:00",
+      "dehradun": "13:50:00",
+      "up": "13:50:00",
       "delhi": "13:50:00"
     },
     "stations": [
-      "bangalore",
-      "jaipur",
+      "dehradun",
+      "up",
       "delhi"
     ]
   }

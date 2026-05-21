@@ -1,4 +1,5 @@
 package org.example.irctc.services;
+import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.util.UserServiceUtil;
 import org.example.irctc.exception.UserFoundException;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 // object mapper is used to convert the json-> Object (User) -----> Deserialize
@@ -24,47 +26,44 @@ import java.util.stream.Collectors;
 
 public class UserBookingServices {
     private User user;
-    private static final String USER_PATH="../localDB/users.json";
+    private static final String USER_PATH="C:\\Users\\ACER\\OneDrive\\Desktop\\SpringBoot\\IRCTC\\src\\main\\java\\org\\example\\irctc\\localDB\\users.json";
     private ObjectMapper objectMapper=new ObjectMapper();
     public List<User>userList;
 
     //constructor
     public UserBookingServices(User user1) throws IOException {
         this.user=user1;
-        File users=new File(USER_PATH); //to get users from database (json hree)
-        if(!users.exists() || users.length()==0){
-            this.userList=new ArrayList<>();
-        }else{
-            userList=objectMapper.readValue(users, new TypeReference<List<User>>() {});  //to perfrom object mapping ,we do deserialization here
-
-        }
+        this.userList=loadUser();
     }
 
 
 
     public UserBookingServices()throws IOException {
-       loadUser();
+       userList=loadUser();
     }
 
     public List<User> loadUser() throws IOException{
         File users=new File(USER_PATH);
+        if(!users.exists() || users.length()==0){
+            return new ArrayList<>();
+        }
        return objectMapper.readValue(users, new TypeReference<List<User>>() {});  //to perfrom object mapping ,we do deserialization here
     }
 
     public Boolean findUser(User user1){
-      return userList.parallelStream().anyMatch( user-> user.getEmail().equalsIgnoreCase((user1.getEmail())));
+      return userList.parallelStream().anyMatch( user->user!=null && user.getEmail() != null && user.getEmail().equalsIgnoreCase((user1.getEmail())));
 
     }
 
-    public Boolean login(){
+    public Optional<User> login(){
         Optional<User> fetchedUser=userList.parallelStream().filter(user1->{
             return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),user1.getHashedPassword()); }).findFirst();
 
        if(fetchedUser.isPresent()){
            this.user=fetchedUser.get();
-           return Boolean.TRUE;
+           return fetchedUser;
        }else{
-           return Boolean.FALSE;
+           return Optional.empty();
        }
     }
 
@@ -72,6 +71,7 @@ public class UserBookingServices {
         if(findUser(user1)){
             throw new UserFoundException("User found with same credentials");
         }
+        user1.setUserId(UUID.randomUUID().toString());
         try{
             userList.add(user1);
             saveUserListToFile();
@@ -126,12 +126,45 @@ public class UserBookingServices {
     }
 
     public List<Train> getTrains(String source,String destination){
+       List<Train>ans=null;
         try{
-           return trainService.searchTrains(source,destination);
-        }catch(Exception e){
-
+           TrainService t=new TrainService();
+           ans= t.searchTrains(source,destination);
+        }catch(IOException e){
+            System.out.println("No train available!!");
         }
+        return ans;
     }
+
+
+    public Optional<Ticket> bookSeat(String trainId, Integer seatNo, String destination) throws IOException {
+
+        if (this.user == null) {
+            System.out.println("Error: You must be logged in to book a ticket.");
+            return Optional.empty();
+        }
+
+
+        String loggedInUserId = this.user.getUserId();
+        TrainService t=new TrainService();
+
+        Optional<Ticket>ticketOpt= t.bookSeat(trainId, seatNo, loggedInUserId, destination);
+        if(ticketOpt.isPresent()){
+            if (user.getTicketBooked() == null) {
+                user.setTicketBooked(new ArrayList<>());
+            }
+            user.getTicketBooked().add(ticketOpt.get());
+            for (int i = 0; i < userList.size(); i++) {
+                if (userList.get(i).getUserId().equals(loggedInUserId)) {
+                    userList.set(i, user);
+                    break;
+                }
+            }
+            saveUserListToFile();
+        }
+        return ticketOpt;
+    }
+
 
 
 }

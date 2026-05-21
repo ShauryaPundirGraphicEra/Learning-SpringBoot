@@ -40,9 +40,13 @@ public class User {
     public User(){}
 
     public void printTickets(){
-        for(int i=0;i<ticketBooked.size();i++){
-            System.out.println(ticketBooked.get(i).getTicketInfo());
+        if(ticketBooked==null || ticketBooked.isEmpty()){
+            System.out.println("No tickets/booking yet");
+        }else {
+            for (int i = 0; i < ticketBooked.size(); i++) {
+                System.out.println(ticketBooked.get(i).getTicketInfo());
 
+            }
         }
     }
 
