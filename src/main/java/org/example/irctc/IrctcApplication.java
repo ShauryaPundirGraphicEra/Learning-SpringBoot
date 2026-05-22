@@ -141,7 +141,18 @@ public class IrctcApplication {
                     break;
 
                 case 6:
-                    System.out.println("Cancel Booking functionality not implemented yet.");
+                    System.out.print("Enter the Ticket ID you want to cancel: ");
+                    String ticketIdToCancel = sc.next();
+
+
+                        Boolean isCancelled = userBookingServices.cancelBooking(ticketIdToCancel);
+
+                        if (isCancelled) {
+                            System.out.println("Booking cancelled successfully!");
+                        } else {
+                            System.out.println("Cancel failed! Invalid Ticket ID or no tickets found.");
+                        }
+
                     break;
 
                 case 7:

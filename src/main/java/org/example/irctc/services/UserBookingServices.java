@@ -90,12 +90,21 @@ public class UserBookingServices {
     }
 
     public void fetchBooking(){
-
+        if(user!=null){
         user.printTickets();
+        }
+        else{
+            System.out.println("Kindly sign up or login first!!");
+        }
     }
 
     public Boolean cancelBooking(String ticketId){
-     if(user.getTicketBooked()==null){
+//        if (user == null) {
+//            System.out.println("Error: You must be logged in to cancel a ticket.");
+//            return Boolean.FALSE;
+//        }
+
+        if(user.getTicketBooked()==null){
          return Boolean.FALSE;
      }
      long initialSize=user.getTicketBooked().size();
@@ -112,7 +121,7 @@ public class UserBookingServices {
       }
       try{
           for (int i = 0; i < userList.size(); i++) {
-              if (userList.get(i).getEmail().equalsIgnoreCase(user.getEmail())) {
+              if (userList.get(i).getEmail() != null && userList.get(i).getEmail().equalsIgnoreCase(user.getEmail())) {
                   userList.set(i, user);
                   break;
               }
