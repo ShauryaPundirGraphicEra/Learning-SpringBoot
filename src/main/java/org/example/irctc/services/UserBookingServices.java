@@ -155,7 +155,7 @@ public class UserBookingServices {
             }
             user.getTicketBooked().add(ticketOpt.get());
             for (int i = 0; i < userList.size(); i++) {
-                if (userList.get(i).getUserId().equals(loggedInUserId)) {
+                if (userList.get(i).getUserId() != null && userList.get(i).getUserId().equals(loggedInUserId)) {
                     userList.set(i, user);
                     break;
                 }
