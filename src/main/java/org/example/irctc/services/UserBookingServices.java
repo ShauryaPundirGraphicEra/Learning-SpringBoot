@@ -56,16 +56,23 @@ public class UserBookingServices {
 
     }
 
-    public Optional<User> login(){
-        Optional<User> fetchedUser=userList.parallelStream().filter(user1->{
-            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),user1.getHashedPassword()); }).findFirst();
+//    public Optional<User> login(){
+//        Optional<User> fetchedUser=userList.parallelStream().filter(user1->{
+//            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),user1.getHashedPassword()); }).findFirst();
+//
+//       if(fetchedUser.isPresent()){
+//           this.user=fetchedUser.get();
+//           return fetchedUser;
+//       }else{
+//           return Optional.empty();
+//       }
+//    }
 
-       if(fetchedUser.isPresent()){
-           this.user=fetchedUser.get();
-           return fetchedUser;
-       }else{
-           return Optional.empty();
-       }
+
+    public Optional<User> loginUser(String name, String rawPassword) {
+        return userList.stream()
+                .filter(u ->u.getHashedPassword()!=null && u.getName().equals(name) && UserServiceUtil.checkPassword(rawPassword, u.getHashedPassword()))
+                .findFirst();
     }
 
     public Boolean signUp(User user1) throws UserFoundException{
