@@ -26,15 +26,18 @@ public class Train {
 
     public Train( @JsonProperty("train_id") String trainId,
                   @JsonProperty("train_no") String trainNo,
-                  List<List<Integer>> seats,
+                  @JsonProperty("seats") List<List<Integer>> seats,
                   @JsonProperty("station_times") Map<String, String> stationTimes,
-                  List<String> stations){
+                  @JsonProperty("stations") List<String> stations){
         this.seats=seats;
         this.trainNo=trainNo;
         this.stationTimes=stationTimes;
         this.trainId=trainId;
         this.stations=stations;
     }
+
+
+    public Train() {}
 
 //    public String getTrainInfo(){
 //        return String.format("Train ID: %s -- Train No: %s",trainId,trainNo);

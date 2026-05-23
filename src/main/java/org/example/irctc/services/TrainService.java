@@ -3,15 +3,17 @@ package org.example.irctc.services;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.entities.User;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+//import tools.jackson.core.type.TypeReference;
+//import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import tools.jackson.databind.ObjectMapper;
+
 
 public class TrainService {
 //    private Train train;
