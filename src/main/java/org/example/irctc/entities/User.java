@@ -44,11 +44,11 @@ public class User {
         this.hashedPassword=hashedPassword;
     }
 
-    public User(String userName,String password){
-        this.name=name;
-        this.password=password;
-
-    }
+//    public User(String userName,String password){
+//        this.name=;
+//        this.password=password;
+//
+//    }
 
     public User(){}
 

@@ -1,10 +1,12 @@
 package org.example.irctc.controllers;
 
 
+import org.example.irctc.dto.AuthResponse;
 import org.example.irctc.dto.LoginRequest;
 import org.example.irctc.entities.User;
 import org.example.irctc.exception.UserFoundException;
 import org.example.irctc.services.UserBookingServices;
+import org.example.irctc.util.JwtUtil;
 import org.example.irctc.util.UserServiceUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,10 +48,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String>userLogin(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<AuthResponse>userLogin(@RequestBody LoginRequest loginRequest){
         String name=loginRequest.getName();
         String password=loginRequest.getPassword();
-        User userToLogin = new User(name, password,UserServiceUtil.hashPassword(password));
+     //   User userToLogin = new User(name, password,UserServiceUtil.hashPassword(password));
  //       try {
 //            userBookingServices = new UserBookingServices(userToLogin);
            // Optional<User> loggedInUser = userBookingServices.login();
@@ -57,11 +59,14 @@ public class UserController {
            // System.out.println(loggedInUser);
             if (loggedInUser.isPresent()) {
               //  userBookingServices = new UserBookingServices(loggedInUser.get());
+                User user = loggedInUser.get();
                 System.out.println(" Login successful! Welcome back.");
-                return ResponseEntity.ok("Login successful!!");
+                String accessToken = JwtUtil.generateAccessToken(user.getUserId(), user.getName());
+                String refreshToken = JwtUtil.generateRefreshToken(user.getUserId());
+                return ResponseEntity.ok(new AuthResponse(accessToken,refreshToken,"Login successful!!"));
                } else {
                 System.out.println(" Invalid username or password.");
-                return ResponseEntity.badRequest().body("Invalid username or password.");
+                return ResponseEntity.badRequest().body(new AuthResponse(null, null, "Invalid username or password."));
                }
 
 //        } catch (IOException e) {
@@ -69,5 +74,7 @@ public class UserController {
 //        }
         //return ResponseEntity.internalServerError().body("Some internal error!!");
     }
+
+
 
 }
