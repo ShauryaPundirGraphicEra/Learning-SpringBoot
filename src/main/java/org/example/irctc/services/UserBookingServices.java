@@ -106,6 +106,19 @@ public class UserBookingServices {
         }
     }
 
+    public List<Ticket> fetchBookingsByUserId(String userId) {
+        if (userId == null || this.userList == null) {
+            return new ArrayList<>();
+        }
+
+
+        return this.userList.stream()
+                .filter(u -> u.getUserId() != null && u.getUserId().equals(userId))
+                .findFirst()
+                .map(User::getTicketBooked)
+                .orElse(new ArrayList<>());
+    }
+
     public Boolean cancelBooking(String ticketId){
 //        if (user == null) {
 //            System.out.println("Error: You must be logged in to cancel a ticket.");

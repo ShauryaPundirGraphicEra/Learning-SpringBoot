@@ -3,6 +3,8 @@ package org.example.irctc.controllers;
 
 import org.example.irctc.dto.AuthResponse;
 import org.example.irctc.dto.LoginRequest;
+import org.example.irctc.entities.Ticket;
+import org.example.irctc.entities.Train;
 import org.example.irctc.entities.User;
 import org.example.irctc.exception.UserFoundException;
 import org.example.irctc.services.UserBookingServices;
@@ -15,6 +17,7 @@ import org.example.irctc.dto.SignupRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -73,6 +76,22 @@ public class UserController {
 //            System.out.println("Something error happedppedne in Login");
 //        }
         //return ResponseEntity.internalServerError().body("Some internal error!!");
+    }
+
+    @GetMapping("/bookings")
+    public ResponseEntity<?>getBookings(@RequestAttribute("userId") String userId) {
+       try {
+           List<Ticket> userBookings = userBookingServices.fetchBookingsByUserId(userId);
+        return ResponseEntity.ok(userBookings);
+      } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error retrieving bookings: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/bookings/:id")  //trainId
+    public ResponseEntity<Ticket>bookUserSeat(@RequestParam String id,@RequestBody String seatNo){
+       // Train selectedTrain = fetchedTrains.get(seatNo); To Complete
+
     }
 
 
