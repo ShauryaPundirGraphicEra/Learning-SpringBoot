@@ -88,12 +88,6 @@ public class UserController {
         }
     }
 
-    @PostMapping("/bookings/:id")  //trainId
-    public ResponseEntity<Ticket>bookUserSeat(@RequestParam String id,@RequestBody String seatNo){
-       // Train selectedTrain = fetchedTrains.get(seatNo); To Complete
-
-    }
-
 
 
 }

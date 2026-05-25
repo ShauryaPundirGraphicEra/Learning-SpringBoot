@@ -1,7 +1,9 @@
 package org.example.irctc.controllers;
 
+import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.services.TrainService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -23,5 +25,18 @@ public class TrainController {
 
         return trainService.searchTrains(source, destination);
     }
+
+    @PostMapping("/bookings/:id")  //trainId
+    public ResponseEntity<Ticket> bookUserSeat(@RequestParam String trainId, @RequestBody String seatNo){
+        // Train selectedTrain = fetchedTrains.get(seatNo); To Complete
+        Train fetchedTrain=trainService.searchTrainById(trainId);
+        if (fetchedTrain == null) {
+
+            return ResponseEntity.status(404);
+        }
+        //to complete
+
+    }
+
 
 }

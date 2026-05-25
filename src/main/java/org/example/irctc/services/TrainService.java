@@ -44,6 +44,15 @@ public class TrainService {
 
     }
 
+    public Train searchTrainById(String trainId){
+
+        return allTrains.stream()
+                .filter(train -> {
+                    String id=train.getTrainId();
+                    return id.equals(trainId);
+                }).findFirst().orElse(null);
+    }
+
     public Optional<Ticket> bookSeat(String trainId, Integer seatNo,String userId,String destination){
        if(userId==null){
            System.out.println("Cannot fetch userId during booking !!!");
