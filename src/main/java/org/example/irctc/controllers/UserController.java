@@ -87,6 +87,17 @@ public class UserController {
             return ResponseEntity.internalServerError().body("Error retrieving bookings: " + e.getMessage());
         }
     }
+    //DELETE http://localhost:8080/api/users/bookings/{ticketId}
+    @DeleteMapping("bookings/{ticketId}")
+    public ResponseEntity<String>cancelUserBookings(@PathVariable String ticketId,@RequestAttribute("userId") String userId){
+        Boolean isCancelled = userBookingServices.cancelBookingStateless(ticketId, userId);
+        if (isCancelled) {
+            return ResponseEntity.ok("Booking cancelled successfully!");
+        } else {
+            return ResponseEntity.badRequest().body("Cancellation failed. Invalid Ticket ID or ownership mismatch.");
+        }
+    }
+
 
 
 

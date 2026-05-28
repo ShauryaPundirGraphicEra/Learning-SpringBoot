@@ -57,6 +57,10 @@ public class UserBookingServices {
 
     }
 
+    public User findUserById(String userId){
+        return userList.parallelStream().filter(user->user!=null && user.getUserId()!=null && user.getUserId().equals(userId)).findAny().orElse(null);
+    }
+
 //    public Optional<User> login(){
 //        Optional<User> fetchedUser=userList.parallelStream().filter(user1->{
 //            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),user1.getHashedPassword()); }).findFirst();
@@ -119,6 +123,44 @@ public class UserBookingServices {
                 .map(User::getTicketBooked)
                 .orElse(new ArrayList<>());
     }
+
+    public Boolean cancelBookingStateless(String ticketId,String userId){
+        User user=findUserById(userId);
+        if(user==null){
+            System.out.println("You must be logged in to cancel ticket");
+            return Boolean.FALSE;
+        }
+        if(user.getTicketBooked()==null){
+            return Boolean.FALSE;
+        }
+        long initialSize=user.getTicketBooked().size();
+
+        //fetch tickets of the current user-> remove the ticketId provided by the user from the user's ticketBooked list->update in the DB
+
+        user.setTicketBooked(user.getTicketBooked().parallelStream().
+                filter(ticket->!ticket.getTicketId().equals(ticketId))
+                .collect(Collectors.toList())
+        );
+
+        if(user.getTicketBooked().size()==initialSize){
+            return Boolean.FALSE;
+        }
+        try{
+            for (int i = 0; i < userList.size(); i++) {
+                if (userList.get(i).getUserId() != null && userList.get(i).getUserId().equalsIgnoreCase(userId)) {
+                    userList.set(i, user);
+                    break;
+                }
+            }
+            // Commit changes to  JSON file
+            saveUserListToFile();
+            return Boolean.TRUE;
+        }catch (IOException e){
+            return Boolean.FALSE;
+        }
+
+    }
+
 
     public Boolean cancelBooking(String ticketId){
 //        if (user == null) {
