@@ -3,6 +3,8 @@ package org.example.irctc.entities;
 import java.sql.Time;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,6 +44,7 @@ public class Train {
 //    public String getTrainInfo(){
 //        return String.format("Train ID: %s -- Train No: %s",trainId,trainNo);
 //    }
+@JsonIgnore
 public String getTrainInfo() {
     // 1. Calculate occupied vs total seats from the 2D list
     int totalSeats = 0;
@@ -59,13 +62,13 @@ public String getTrainInfo() {
     }
     int availableSeats = totalSeats - occupiedSeats;
 
-    // 2. Format the intermediate stations route path (e.g., StationA -> StationB -> StationC)
+
     String routePath = "No route defined";
     if (stations != null && !stations.isEmpty()) {
         routePath = String.join(" ➔ ", stations);
     }
 
-    // 3. Construct a clear, visually structured dashboard string
+
     return String.format(
             "==================================================\n" +
                     " TRAIN: %s (ID: %s)\n" +

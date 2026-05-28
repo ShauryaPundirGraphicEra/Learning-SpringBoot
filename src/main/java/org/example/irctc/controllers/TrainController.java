@@ -1,13 +1,16 @@
 package org.example.irctc.controllers;
 
+import org.example.irctc.dto.BookingRequest;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.services.TrainService;
+import org.example.irctc.services.UserBookingServices;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/trains")
@@ -26,15 +29,31 @@ public class TrainController {
         return trainService.searchTrains(source, destination);
     }
 
-    @PostMapping("/bookings/:id")  //trainId
-    public ResponseEntity<Ticket> bookUserSeat(@RequestParam String trainId, @RequestBody String seatNo){
+    @PostMapping("/bookings/{trainId}")  //trainId
+    public ResponseEntity<?> bookUserSeat(@PathVariable String trainId, @RequestBody BookingRequest bookingRequest, @RequestAttribute("userId") String userId){
         // Train selectedTrain = fetchedTrains.get(seatNo); To Complete
         Train fetchedTrain=trainService.searchTrainById(trainId);
         if (fetchedTrain == null) {
 
-            return ResponseEntity.status(404);
+            return ResponseEntity.status(404).body("Error finding the train");
         }
         //to complete
+        try{
+            UserBookingServices userBookingServices = new UserBookingServices();
+
+
+            Optional<Ticket> ticketOpt = userBookingServices.bookSeatStateless(
+                    trainId, bookingRequest.getSeatNo(), userId);
+            if (ticketOpt.isPresent()) {
+
+                return ResponseEntity.ok(ticketOpt.get());
+            } else {
+                return ResponseEntity.badRequest().body("Booking failed. The selected seat may already be occupied or invalid.");
+            }
+        } catch (IOException e) {
+            System.out.println("System Exception during database file modification operations: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("An internal server error occurred while writing data.");
+        }
 
     }
 

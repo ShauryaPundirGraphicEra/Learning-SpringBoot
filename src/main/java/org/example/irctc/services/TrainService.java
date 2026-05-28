@@ -30,6 +30,12 @@ public class TrainService {
         return objectMapper.readValue(trains, new TypeReference<List<Train>>() {});  //to perfrom object mapping ,we do deserialization here
     }
 
+    // Adds persistence for train data changes
+    public void saveTrainListToFile() throws IOException {
+        File trainFile = new File(USER_PATH);
+        objectMapper.writeValue(trainFile, allTrains);
+    }
+
     public List<Train> searchTrains(String source,String destination){
 
         return allTrains.stream()
@@ -53,7 +59,7 @@ public class TrainService {
                 }).findFirst().orElse(null);
     }
 
-    public Optional<Ticket> bookSeat(String trainId, Integer seatNo,String userId,String destination){
+    public Optional<Ticket> bookSeat(String trainId, Integer seatNo,String userId){
        if(userId==null){
            System.out.println("Cannot fetch userId during booking !!!");
            return Optional.empty();
@@ -61,6 +67,8 @@ public class TrainService {
         Optional<Train> trainOptional=allTrains.stream().filter( train1 -> train1.getTrainId().equals(trainId)).findFirst();
         if (trainOptional.isPresent()) {
             Train train=trainOptional.get();
+            String destination=train.getStations().getLast();
+            String source=train.getStations().getFirst();
 
             List<List<Integer>> seatsGrid = trainOptional.get().getSeats();;
 
@@ -68,14 +76,10 @@ public class TrainService {
                 return Optional.empty();
             }
 
-            // 2. Calculate rows and columns based on the grid structure
             int seatsPerRow = seatsGrid.get(0).size();
 
-            // Convert flat 1-based seat number to 0-based 2D matrix indices
             int rowIndex = (seatNo - 1) / seatsPerRow;
             int colIndex = (seatNo - 1) % seatsPerRow;
-
-            // 3. Boundary check to avoid IndexOutOfBoundsException
             if (rowIndex < 0 || rowIndex >= seatsGrid.size() || colIndex < 0 || colIndex >= seatsPerRow) {
                 return Optional.empty();
             }
@@ -87,7 +91,7 @@ public class TrainService {
                 String ticketId = UUID.randomUUID().toString();
                 Date dateOfTravel = new Date(); // Sets to current time/date of booking
 
-                Ticket ticket = new Ticket(ticketId, userId, destination, dateOfTravel, train);
+                Ticket ticket = new Ticket(ticketId, userId, source,destination, dateOfTravel, train);
                 return Optional.of(ticket);
             }
 

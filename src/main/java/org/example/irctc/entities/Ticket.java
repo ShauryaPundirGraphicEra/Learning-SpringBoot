@@ -1,5 +1,6 @@
 package org.example.irctc.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,21 +12,25 @@ public class Ticket {
     @Getter @Setter
     private String userId;
     @Getter @Setter
+    private String source;
+    @Getter @Setter
     private String destination;
     @Getter @Setter
     private Date dateOfTravel;
     @Getter @Setter
     private Train train;
 
-     public Ticket(String ticketId, String userId, String destination, Date dateOfTravel, Train train){
+     public Ticket(String ticketId, String userId,String source, String destination, Date dateOfTravel, Train train){
          this.ticketId=ticketId;
          this.userId=userId;
+         this.source=source;
          this.destination=destination;
          this.dateOfTravel=dateOfTravel;
          this.train=train;
      }
     public Ticket(){}
 
+    @JsonIgnore
     public String getTicketInfo(){
 
         return String.format("Ticket ID: %s belongs to User %s from %s to %s on %s", ticketId, userId, train.getStations().get(0), destination, dateOfTravel);

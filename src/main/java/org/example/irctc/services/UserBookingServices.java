@@ -30,6 +30,7 @@ public class UserBookingServices {
     private static final String USER_PATH="C:\\Users\\ACER\\OneDrive\\Desktop\\SpringBoot\\IRCTC\\src\\main\\java\\org\\example\\irctc\\localDB\\users.json";
     private ObjectMapper objectMapper=new ObjectMapper();
     public List<User>userList;
+    private List<Train>allTrains;
 
     //constructor
     public UserBookingServices(User user1) throws IOException {
@@ -167,7 +168,7 @@ public class UserBookingServices {
     }
 
 
-    public Optional<Ticket> bookSeat(String trainId, Integer seatNo, String destination) throws IOException {
+    public Optional<Ticket> bookSeat(String trainId, Integer seatNo) throws IOException {
 
         if (this.user == null) {
             System.out.println("Error: You must be logged in to book a ticket.");
@@ -178,7 +179,7 @@ public class UserBookingServices {
         String loggedInUserId = this.user.getUserId();
         TrainService t=new TrainService();
 
-        Optional<Ticket>ticketOpt= t.bookSeat(trainId, seatNo, loggedInUserId, destination);
+        Optional<Ticket>ticketOpt= t.bookSeat(trainId, seatNo, loggedInUserId);
         if(ticketOpt.isPresent()){
             if (user.getTicketBooked() == null) {
                 user.setTicketBooked(new ArrayList<>());
@@ -195,6 +196,35 @@ public class UserBookingServices {
         return ticketOpt;
     }
 
+
+    // Fully stateless coordination between TrainService and User data updates
+    public Optional<Ticket> bookSeatStateless(String trainId, Integer seatNo, String loggedInUserId) throws IOException {
+        TrainService trainService = new TrainService();
+
+
+        Optional<Ticket> ticketOpt = trainService.bookSeat(trainId, seatNo, loggedInUserId);
+
+        if (ticketOpt.isPresent()) {
+            // 2. Persist the updated seat grid to trains.json
+            trainService.saveTrainListToFile();
+
+            // 3. Find the user in our list and append the new ticket to their history
+            for (int i = 0; i < userList.size(); i++) {
+                if (userList.get(i).getUserId() != null && userList.get(i).getUserId().equals(loggedInUserId)) {
+                    User matchingUser = userList.get(i);
+                    if (matchingUser.getTicketBooked() == null) {
+                        matchingUser.setTicketBooked(new ArrayList<>());
+                    }
+                    matchingUser.getTicketBooked().add(ticketOpt.get());
+                    userList.set(i, matchingUser);
+                    break;
+                }
+            }
+            // 4. Persist the updated user profile to users.json
+            saveUserListToFile();
+        }
+        return ticketOpt;
+    }
 
 
 }
