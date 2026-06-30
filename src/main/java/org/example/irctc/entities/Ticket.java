@@ -4,50 +4,43 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.irctc.entities.Train;
 
 import java.util.Date;
 
 @Entity
-@Table(name="ticket")
+@Table(name="tickets")
 @Getter
 @Setter
-
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ticket {
-    @Column(name = "ticket_id")
+//    @Column(name = "ticket_id")
     @Id
     @GeneratedValue(strategy=GenerationType.UUID)
     private String ticketId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private String userId;
+    private User user;
 
     private String source;
 
     private String destination;
 
-    @Column(name = "date_of_travel")
+//    @Column(name = "date_of_travel")
     private Date dateOfTravel;
+
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "train_id", nullable = false)
     private Train train;
 
-     public Ticket(String ticketId, String userId,String source, String destination, Date dateOfTravel, Train train){
-         this.ticketId=ticketId;
-         this.userId=userId;
-         this.source=source;
-         this.destination=destination;
-         this.dateOfTravel=dateOfTravel;
-         this.train=train;
-     }
-    public Ticket(){}
 
-    @JsonIgnore
-    public String getTicketInfo(){
-
-        return String.format("Ticket ID: %s belongs to User %s from %s to %s on %s", ticketId, userId, train.getStations().get(0), destination, dateOfTravel);
-    }
 
 }

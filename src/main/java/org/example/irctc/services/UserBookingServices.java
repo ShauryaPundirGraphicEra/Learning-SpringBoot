@@ -1,4 +1,5 @@
 package org.example.irctc.services;
+import jakarta.transaction.Transactional;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.util.UserServiceUtil;
@@ -9,6 +10,7 @@ import org.example.irctc.entities.User;
 //import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+import org.example.irctc.repositories.UserRepository;
 // object mapper is used to convert the json-> Object (User) -----> Deserialize
 // Object(User)-> json ------>Serialize
 
@@ -72,6 +74,29 @@ public class UserBookingServices {
 //           return Optional.empty();
 //       }
 //    }
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Transactional(readOnly = true) //Safe, read-only transaction for lazy fetch
+    public void printUserTickets(String userId) {
+        // Fetch the user from MySQL database
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Ticket> tickets = user.getTicketBooked();
+
+        // Perform the data evaluation logic here
+        if (tickets == null || tickets.isEmpty()) {
+            System.out.println("No tickets/booking yet for user: " + user.getName());
+            return;
+        }
+
+        System.out.println("Booking history for " + user.getName() + ":");
+        for (Ticket ticket : tickets) {
+            System.out.println(ticket.getTicketInfo());
+        }
+    }
 
 
     public Optional<User> loginUser(String name, String rawPassword) {
