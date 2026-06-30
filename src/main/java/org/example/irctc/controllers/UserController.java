@@ -39,7 +39,7 @@ public class UserController {
         String name=signupRequest.getName();
         String email= signupRequest.getEmail();
         String password=signupRequest.getPassword();
-        User newUser = new User(name, email, password, UserServiceUtil.hashPassword(password), new ArrayList<>(), UUID.randomUUID().toString());
+        User newUser = new User(name, email, password, UserServiceUtil.hashPassword(password), new ArrayList<>());
         try {
             this.userBookingServices.signUp(newUser);
             return ResponseEntity.ok("User created successfully");

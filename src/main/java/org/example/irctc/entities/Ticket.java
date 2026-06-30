@@ -1,23 +1,37 @@
 package org.example.irctc.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Date;
 
+@Entity
+@Table(name="ticket")
+@Getter
+@Setter
+
 public class Ticket {
-    @Getter @Setter
+    @Column(name = "ticket_id")
+    @Id
+    @GeneratedValue(strategy=GenerationType.UUID)
     private String ticketId;
-    @Getter @Setter
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private String userId;
-    @Getter @Setter
+
     private String source;
-    @Getter @Setter
+
     private String destination;
-    @Getter @Setter
+
+    @Column(name = "date_of_travel")
     private Date dateOfTravel;
-    @Getter @Setter
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "train_id", nullable = false)
     private Train train;
 
      public Ticket(String ticketId, String userId,String source, String destination, Date dateOfTravel, Train train){

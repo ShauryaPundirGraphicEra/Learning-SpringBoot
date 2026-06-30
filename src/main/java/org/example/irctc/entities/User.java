@@ -1,37 +1,50 @@
 package org.example.irctc.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
-
+@Getter
+@Setter
+@NoArgsConstructor
+@Entity            // Tells Hibernate to create a MySQL table named "users"
+@Table(name = "users")
 public class User {
-    @Getter @Setter
+
     @JsonProperty("name")
     private String name;
-    @Getter @Setter
+
     @JsonProperty("email")
     private String email;
-    @Getter @Setter
+
+
     @JsonProperty("password")
     private String password;
-    @Getter @Setter
+
+    @Column(name = "hashed_password")
     @JsonProperty("hashedPassword")
     private String hashedPassword;
-    @Getter @Setter
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     @JsonProperty("ticketBooked")
-    private List<Ticket>ticketBooked;
-    @Getter @Setter
+    private List<Ticket> ticketBooked=new ArrayList<>();
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "user_id")
     @JsonProperty("userId")
-    private String userId;
+    private long userId;
 
 
-    public User(@JsonProperty("name")String name,@JsonProperty("email")String email,@JsonProperty("password")String password,@JsonProperty("hashedPassword")String hashedPassword,@JsonProperty("ticketBooked")List<Ticket>ticketBooked,@JsonProperty("userId")String userId){
+    public User(@JsonProperty("name")String name,@JsonProperty("email")String email,@JsonProperty("password")String password,@JsonProperty("hashedPassword")String hashedPassword,@JsonProperty("ticketBooked")List<Ticket>ticketBooked){
         this.name=name;
-        this.userId=userId;
         this.email=email;
         this.ticketBooked=ticketBooked;
         this.password=password;
@@ -50,7 +63,6 @@ public class User {
 //
 //    }
 
-    public User(){}
 
     public void printTickets(){
         if(ticketBooked==null || ticketBooked.isEmpty()){

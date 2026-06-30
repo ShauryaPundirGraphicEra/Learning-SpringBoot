@@ -25,6 +25,9 @@ dependencies {
     // 2. Explicit Jackson Dependencies (This fixes your compile error!)
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.core:jackson-core'
+    // instead of jackson we will use it
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // Hibernate & JPA core
+    runtimeOnly 'com.mysql:mysql-connector-j'   //for mysql
 
     // 3. Security & Utilities
     implementation 'org.mindrot:jbcrypt:0.4'
