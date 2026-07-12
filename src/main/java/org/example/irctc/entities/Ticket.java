@@ -33,10 +33,6 @@ public class Ticket {
 //    @Column(name = "date_of_travel")
     private Date dateOfTravel;
 
-    @ManyToOne
-    @JoinColumn(name="user_id")
-    private User user;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "train_id", nullable = false)
     private Train train;

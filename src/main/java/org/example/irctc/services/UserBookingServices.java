@@ -1,5 +1,6 @@
 package org.example.irctc.services;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.util.UserServiceUtil;
@@ -20,65 +21,40 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.example.irctc.repositories.UserRepository;
+import org.springframework.stereotype.Service;
 // object mapper is used to convert the json-> Object (User) -----> Deserialize
 // Object(User)-> json ------>Serialize
 
 
 
 
-
+@Service
+@RequiredArgsConstructor
 public class UserBookingServices {
     private User user;
-    private static final String USER_PATH="C:\\Users\\ACER\\OneDrive\\Desktop\\SpringBoot\\IRCTC\\src\\main\\java\\org\\example\\irctc\\localDB\\users.json";
-    private ObjectMapper objectMapper=new ObjectMapper();
-    public List<User>userList;
     private List<Train>allTrains;
-
-    //constructor
-    public UserBookingServices(User user1) throws IOException {
-        this.user=user1;
-        this.userList=loadUser();
-    }
+    @Autowired
+    private UserRepository userRepository;
 
 
 
-    public UserBookingServices()throws IOException {
-       userList=loadUser();
-    }
 
-    public List<User> loadUser() throws IOException{
-        File users=new File(USER_PATH);
-        if(!users.exists() || users.length()==0){
-            return new ArrayList<>();
-        }
-       return objectMapper.readValue(users, new TypeReference<List<User>>() {});  //to perfrom object mapping ,we do deserialization here
-    }
+
 
     public Boolean findUser(User user1){
       return userList.parallelStream().anyMatch( user->user!=null && user.getEmail() != null && user.getEmail().equalsIgnoreCase((user1.getEmail())));
 
     }
 
-    public User findUserById(String userId){
-        return userList.parallelStream().filter(user->user!=null && user.getUserId()!=null && user.getUserId().equals(userId)).findAny().orElse(null);
+    public User findUserById(long userId){
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-//    public Optional<User> login(){
-//        Optional<User> fetchedUser=userList.parallelStream().filter(user1->{
-//            return user1.getName().equals(user.getName()) && UserServiceUtil.checkPassword(user.getPassword(),user1.getHashedPassword()); }).findFirst();
-//
-//       if(fetchedUser.isPresent()){
-//           this.user=fetchedUser.get();
-//           return fetchedUser;
-//       }else{
-//           return Optional.empty();
-//       }
-//    }
 
-    @Autowired
-    private UserRepository userRepository;
 
-    @Transactional(readOnly = true) //Safe, read-only transaction for lazy fetch
+
+//    @Transactional(readOnly = true) //Safe, read-only transaction for lazy fetch
     public void printUserTickets(String userId) {
         // Fetch the user from MySQL database
         User user = userRepository.findById(userId)
@@ -100,32 +76,34 @@ public class UserBookingServices {
 
 
     public Optional<User> loginUser(String name, String rawPassword) {
-        return userList.stream()
-                .filter(u ->u.getHashedPassword()!=null && u.getName().equals(name) && UserServiceUtil.checkPassword(rawPassword, u.getHashedPassword()))
-                .findFirst();
+        Optional<User> user = userRepository.findByName(name);
+
+        if(user.isPresent()
+                && UserServiceUtil.checkPassword(rawPassword,
+                user.get().getHashedPassword())){
+            return user;
+        }
+
+        return Optional.empty();
     }
+
+
 
     public Boolean signUp(User user1) throws UserFoundException{
-        if(findUser(user1)){
-            throw new UserFoundException("User found with same credentials");
+        if(userRepository.existsByEmail(user.getEmail())){
+            throw new UserFoundException("User already exists");
         }
-        user1.setUserId(UUID.randomUUID().toString());
-        try{
-            userList.add(user1);
-            saveUserListToFile();
-            return Boolean.TRUE;
-        }catch (IOException e){
-            return Boolean.FALSE;
-        }
+
+        userRepository.save(user);
 
 
     }
 
-    private void saveUserListToFile()throws IOException{
-        File userFile=new File(USER_PATH);
-
-        objectMapper.writeValue(userFile,userList);
-    }
+//    private void saveUserListToFile()throws IOException{
+//        File userFile=new File(USER_PATH);
+//
+//        objectMapper.writeValue(userFile,userList);
+//    }
 
     public void fetchBooking(){
         if(user!=null){
