@@ -1,5 +1,6 @@
 package org.example.irctc.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,12 +27,14 @@ public class User {
     private String name;
 
     private String email;
-
+    @JsonIgnore
     private String password;
 
     //@Column(name = "hashed_password")
+    @JsonIgnore
     private String hashedPassword;
 
+    @JsonIgnore
     @OneToMany(mappedBy ="user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ticket> ticketBooked=new ArrayList<>();
     public User(String name,

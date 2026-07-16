@@ -2,6 +2,8 @@ package org.example.irctc.services;
 
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.example.irctc.dto.TrainRequest;
+import org.example.irctc.entities.Seat;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.entities.User;
@@ -61,48 +63,36 @@ public class TrainService {
                 .orElse(null);
     }
 
-//    public Optional<Ticket> bookSeat(String trainId, Integer seatNo,String userId){
-//       if(userId==null){
-//           System.out.println("Cannot fetch userId during booking !!!");
-//           return Optional.empty();
-//       }
-//        Optional<Train> trainOptional=allTrains.stream().filter( train1 -> train1.getTrainId().equals(trainId)).findFirst();
-//        if (trainOptional.isPresent()) {
-//            Train train=trainOptional.get();
-//            String destination=train.getStations().getLast();
-//            String source=train.getStations().getFirst();
-//
-//            List<List<Integer>> seatsGrid = trainOptional.get().getSeats();;
-//
-//            if (seatsGrid == null || seatsGrid.isEmpty()) {
-//                return Optional.empty();
-//            }
-//
-//            int seatsPerRow = seatsGrid.get(0).size();
-//
-//            int rowIndex = (seatNo - 1) / seatsPerRow;
-//            int colIndex = (seatNo - 1) % seatsPerRow;
-//            if (rowIndex < 0 || rowIndex >= seatsGrid.size() || colIndex < 0 || colIndex >= seatsPerRow) {
-//                return Optional.empty();
-//            }
-//
-//            // 4. Check availability (0 = available, 1 = booked)
-//            List<Integer> row = seatsGrid.get(rowIndex);
-//            if (row.get(colIndex) == 0) {
-//                row.set(colIndex, 1); // Mark as booked
-//                String ticketId = UUID.randomUUID().toString();
-//                Date dateOfTravel = new Date(); // Sets to current time/date of booking
-//
-//                Ticket ticket = new Ticket(ticketId, userId, source,destination, dateOfTravel, train);
-//                return Optional.of(ticket);
-//            }
-//
-//
-//
-//
-//        }
-//        return Optional.empty();
-//    }
+    public Train addTrain(TrainRequest request) {
+        Train newTrain = new Train();
+        newTrain.setTrainName(request.getTrainName());
+        newTrain.setTrainNo(request.getTrainNo());
+        newTrain.setStations(request.getStations());
+        newTrain.setStationTimes(request.getStationTimes());
+        List<Seat> generatedSeats = new ArrayList<>();
+
+        // 2. Loop to create the exact number of seats requested
+        for (int i = 1; i <= request.getTotalSeats(); i++) {
+            Seat seat = new Seat();
+            seat.setSeatNumber(i);
+            seat.setBooked(false); // Default to available
+
+            // Optional: Distribute seats into coaches (e.g., 60 seats per coach)
+            // Coach 1: 1-60, Coach 2: 61-120, etc.
+            int coachNumber = ((i - 1) / 60) + 1;
+            seat.setCoach(coachNumber);
+
+            // 3. IMPORTANT: Set the bi-directional relationship!
+            // The seat must know which train it belongs to.
+            seat.setTrain(newTrain);
+
+            generatedSeats.add(seat);
+        }
+
+        // 4. Attach the populated list of seats to the train
+        newTrain.setSeats(generatedSeats);
+        return trainRepository.save(newTrain);
+    }
 
 
 }

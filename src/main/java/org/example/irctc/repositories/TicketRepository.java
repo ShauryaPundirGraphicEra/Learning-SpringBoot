@@ -9,11 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TicketRepository extends CrudRepository<Ticket, Long> {
-    Optional<Ticket> findById(String id);
+
+    Optional<Ticket> findByTicketId(String ticketId);
 
     List<Ticket> findByUser(User user);
     List<Ticket> findByUserUserId(Long userId);
     Optional<Ticket> findByTicketIdAndUserUserId(Long ticketId, Long userId);
 
-    void deleteById(Long id);
+    //void deleteById(Long id);
 }

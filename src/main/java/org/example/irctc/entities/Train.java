@@ -19,9 +19,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Entity(name="trains")
 public class Train {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long trainId;
     private String trainNo;
+    private String trainName;
 
     @ElementCollection
     private List<String>stations;
@@ -31,9 +32,11 @@ public class Train {
     @Column(name = "time")
     private Map<String,String>stationTimes;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "train", cascade = CascadeType.ALL)
     private List<Seat> seats = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "train")
     private List<Ticket> tickets = new ArrayList<>();
 

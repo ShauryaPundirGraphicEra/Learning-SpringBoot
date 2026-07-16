@@ -141,30 +141,27 @@ public class UserBookingServices {
         Train train = trainRepository.findById(trainId)
                 .orElseThrow(() -> new RuntimeException("Train not found"));
 
-        Seat seat = seatRepository
-                .findByTrainTrainIdAndSeatNumber(trainId, seatNo)
-                .orElseThrow(() -> new RuntimeException("Seat not found"));
+        Seat availableSeat = seatRepository.findByTrainAndBookedFalse(train).stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No seats available on this train"));
 
-        if (seat.isBooked()) {
-            return Optional.empty();
-        }
-
-        seat.setBooked(true);
-        seatRepository.save(seat);
-
+        availableSeat.setBooked(true);
+        seatRepository.save(availableSeat);
+        //////////////
         Ticket ticket = new Ticket();
-
         ticket.setUser(user);
         ticket.setTrain(train);
-
+        ticket.setSeat(availableSeat); // <-- THIS IS THE MISSING PIECE
         ticket.setSource(train.getStations().getFirst());
-
-        ticket.setDestination(
-                train.getStations().getLast());
-
+        ticket.setDestination(train.getStations().getLast());
         ticket.setDateOfTravel(new Date());
+        //////////////////
 
-        Ticket savedTicket = ticketRepository.save(ticket);
+
+
+
+
+        Ticket savedTicket= ticketRepository.save(ticket);
 
         return Optional.of(savedTicket);
     }

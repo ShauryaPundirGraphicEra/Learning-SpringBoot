@@ -3,10 +3,12 @@ package org.example.irctc.controllers;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.example.irctc.dto.BookingRequest;
+import org.example.irctc.dto.TrainRequest;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
 import org.example.irctc.services.TrainService;
 import org.example.irctc.services.UserBookingServices;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,6 +63,13 @@ public class TrainController {
         }
 
     }
+
+    @PostMapping("/add")
+    public ResponseEntity<Train> addTrain(@RequestBody TrainRequest request) {
+        Train savedTrain = trainService.addTrain(request);
+        return new ResponseEntity<>(savedTrain, HttpStatus.CREATED);
+    }
+
 
 
 }
