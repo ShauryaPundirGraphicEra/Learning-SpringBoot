@@ -1,5 +1,7 @@
 package org.example.irctc.controllers;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.irctc.dto.BookingRequest;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
@@ -13,14 +15,17 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/trains")
 public class TrainController {
     private final TrainService trainService;
+    private final UserBookingServices userBookingServices;
+
 
     // Spring Boot will automatically run this constructor when the app starts
-    public TrainController() throws IOException {
-        this.trainService = new TrainService();
-    }
+//    public TrainController() throws IOException {
+//        this.trainService = new TrainService();
+//    }
 
     //  GET http://localhost:8080/api/trains/search?source=X&destination=Y
     @GetMapping("/search")
@@ -30,7 +35,7 @@ public class TrainController {
     }
 
     @PostMapping("/bookings/{trainId}")  //trainId
-    public ResponseEntity<?> bookUserSeat(@PathVariable String trainId, @RequestBody BookingRequest bookingRequest, @RequestAttribute("userId") String userId){
+    public ResponseEntity<?> bookUserSeat(@PathVariable Long trainId, @RequestBody BookingRequest bookingRequest, @RequestAttribute("userId") Long userId){
         // Train selectedTrain = fetchedTrains.get(seatNo); To Complete
         Train fetchedTrain=trainService.searchTrainById(trainId);
         if (fetchedTrain == null) {
@@ -39,7 +44,7 @@ public class TrainController {
         }
         //to complete
         try{
-            UserBookingServices userBookingServices = new UserBookingServices();
+
 
 
             Optional<Ticket> ticketOpt = userBookingServices.bookSeatStateless(

@@ -19,8 +19,8 @@ import java.util.Date;
 public class Ticket {
 //    @Column(name = "ticket_id")
     @Id
-    @GeneratedValue(strategy=GenerationType.UUID)
-    private String ticketId;
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long ticketId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -37,6 +37,8 @@ public class Ticket {
     @JoinColumn(name = "train_id", nullable = false)
     private Train train;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_id")
+    private Seat seat;
 
 }

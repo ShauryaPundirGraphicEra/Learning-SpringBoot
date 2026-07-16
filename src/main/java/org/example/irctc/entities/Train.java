@@ -1,6 +1,7 @@
 package org.example.irctc.entities;
 
 import java.sql.Time;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Train {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String trainId;
+    private Long trainId;
     private String trainNo;
 
     @ElementCollection
@@ -30,5 +31,10 @@ public class Train {
     @Column(name = "time")
     private Map<String,String>stationTimes;
 
+    @OneToMany(mappedBy = "train", cascade = CascadeType.ALL)
+    private List<Seat> seats = new ArrayList<>();
+
+    @OneToMany(mappedBy = "train")
+    private List<Ticket> tickets = new ArrayList<>();
 
 }

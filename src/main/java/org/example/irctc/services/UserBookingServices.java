@@ -1,29 +1,25 @@
 package org.example.irctc.services;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.example.irctc.entities.Seat;
 import org.example.irctc.entities.Ticket;
 import org.example.irctc.entities.Train;
+import org.example.irctc.repositories.SeatRepository;
+import org.example.irctc.repositories.TicketRepository;
+import org.example.irctc.repositories.TrainRepository;
 import org.example.irctc.util.UserServiceUtil;
 import org.example.irctc.exception.UserFoundException;
 
 import org.example.irctc.entities.User;
-//import tools.jackson.core.type.TypeReference;
-//import tools.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.example.irctc.repositories.UserRepository;
 import org.springframework.stereotype.Service;
-// object mapper is used to convert the json-> Object (User) -----> Deserialize
-// Object(User)-> json ------>Serialize
+
 
 
 
@@ -33,18 +29,21 @@ import org.springframework.stereotype.Service;
 public class UserBookingServices {
     private User user;
     private List<Train>allTrains;
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
+    private final TrainRepository trainRepository;
+    private final TicketRepository ticketRepository;
+    private final SeatRepository seatRepository;
 
 
 
 
 
 
-    public Boolean findUser(User user1){
-      return userList.parallelStream().anyMatch( user->user!=null && user.getEmail() != null && user.getEmail().equalsIgnoreCase((user1.getEmail())));
-
-    }
+//    public Boolean findUser(User user1){
+//      return userList.parallelStream().anyMatch( user->user!=null && user.getEmail() != null && user.getEmail().equalsIgnoreCase((user1.getEmail())));
+//
+//    }
 
     public User findUserById(long userId){
         return userRepository.findById(userId)
@@ -55,14 +54,14 @@ public class UserBookingServices {
 
 
 //    @Transactional(readOnly = true) //Safe, read-only transaction for lazy fetch
-    public void printUserTickets(String userId) {
+    public void printUserTickets(Long userId) {
         // Fetch the user from MySQL database
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Ticket> tickets = user.getTicketBooked();
 
-        // Perform the data evaluation logic here
+
         if (tickets == null || tickets.isEmpty()) {
             System.out.println("No tickets/booking yet for user: " + user.getName());
             return;
@@ -70,7 +69,8 @@ public class UserBookingServices {
 
         System.out.println("Booking history for " + user.getName() + ":");
         for (Ticket ticket : tickets) {
-            System.out.println(ticket.getTicketInfo());
+           // System.out.println(ticket.getTicketInfo());
+            System.out.println(ticket);
         }
     }
 
@@ -89,186 +89,84 @@ public class UserBookingServices {
 
 
 
-    public Boolean signUp(User user1) throws UserFoundException{
+    public Boolean signUp(User user) throws UserFoundException{
         if(userRepository.existsByEmail(user.getEmail())){
             throw new UserFoundException("User already exists");
+
         }
 
         userRepository.save(user);
 
-
-    }
-
-//    private void saveUserListToFile()throws IOException{
-//        File userFile=new File(USER_PATH);
-//
-//        objectMapper.writeValue(userFile,userList);
-//    }
-
-    public void fetchBooking(){
-        if(user!=null){
-        user.printTickets();
-        }
-        else{
-            System.out.println("Kindly sign up or login first!!");
-        }
-    }
-
-    public List<Ticket> fetchBookingsByUserId(String userId) {
-        if (userId == null || this.userList == null) {
-            return new ArrayList<>();
-        }
-
-
-        return this.userList.stream()
-                .filter(u -> u.getUserId() != null && u.getUserId().equals(userId))
-                .findFirst()
-                .map(User::getTicketBooked)
-                .orElse(new ArrayList<>());
-    }
-
-    public Boolean cancelBookingStateless(String ticketId,String userId){
-        User user=findUserById(userId);
-        if(user==null){
-            System.out.println("You must be logged in to cancel ticket");
-            return Boolean.FALSE;
-        }
-        if(user.getTicketBooked()==null){
-            return Boolean.FALSE;
-        }
-        long initialSize=user.getTicketBooked().size();
-
-        //fetch tickets of the current user-> remove the ticketId provided by the user from the user's ticketBooked list->update in the DB
-
-        user.setTicketBooked(user.getTicketBooked().parallelStream().
-                filter(ticket->!ticket.getTicketId().equals(ticketId))
-                .collect(Collectors.toList())
-        );
-
-        if(user.getTicketBooked().size()==initialSize){
-            return Boolean.FALSE;
-        }
-        try{
-            for (int i = 0; i < userList.size(); i++) {
-                if (userList.get(i).getUserId() != null && userList.get(i).getUserId().equalsIgnoreCase(userId)) {
-                    userList.set(i, user);
-                    break;
-                }
-            }
-            // Commit changes to  JSON file
-            saveUserListToFile();
-            return Boolean.TRUE;
-        }catch (IOException e){
-            return Boolean.FALSE;
-        }
-
+        return true;
     }
 
 
-    public Boolean cancelBooking(String ticketId){
-//        if (user == null) {
-//            System.out.println("Error: You must be logged in to cancel a ticket.");
-//            return Boolean.FALSE;
-//        }
+    public List<Ticket> fetchBookingsByUserId(Long userId) {
+        if (userId == null) {
+            return Collections.emptyList();
+        }
 
-        if(user.getTicketBooked()==null){
-         return Boolean.FALSE;
-     }
-     long initialSize=user.getTicketBooked().size();
-
-      //fetch tickets of the current user-> remove the ticketId provided by the user from the user's ticketBooked list->update in the DB
-
-      user.setTicketBooked(user.getTicketBooked().parallelStream().
-              filter(ticket->!ticket.getTicketId().equals(ticketId))
-              .collect(Collectors.toList())
-      );
-
-      if(user.getTicketBooked().size()==initialSize){
-          return Boolean.FALSE;
-      }
-      try{
-          for (int i = 0; i < userList.size(); i++) {
-              if (userList.get(i).getEmail() != null && userList.get(i).getEmail().equalsIgnoreCase(user.getEmail())) {
-                  userList.set(i, user);
-                  break;
-              }
-          }
-          // Commit changes to  JSON file
-          saveUserListToFile();
-          return Boolean.TRUE;
-      }catch (IOException e){
-          return Boolean.FALSE;
-      }
+        return ticketRepository.findByUserUserId(userId);
     }
+    @Transactional
+    public Boolean cancelBookingStateless(Long ticketId,Long userId){
+        Optional<Ticket> ticketOpt =
+                ticketRepository.findByTicketIdAndUserUserId(ticketId, userId);
+
+        if (ticketOpt.isEmpty()) {
+            return false;
+        }
+
+        ticketRepository.delete(ticketOpt.get());
+
+        return true;
+
+    }
+
 
     public List<Train> getTrains(String source,String destination){
-       List<Train>ans=null;
-        try{
-           TrainService t=new TrainService();
-           ans= t.searchTrains(source,destination);
-        }catch(IOException e){
-            System.out.println("No train available!!");
-        }
-        return ans;
+        List<Train> trains = trainRepository.findBySourceAndDestination(source,destination);
+        return trains;
     }
 
 
-    public Optional<Ticket> bookSeat(String trainId, Integer seatNo) throws IOException {
-
-        if (this.user == null) {
-            System.out.println("Error: You must be logged in to book a ticket.");
-            return Optional.empty();
-        }
-
-
-        String loggedInUserId = this.user.getUserId();
-        TrainService t=new TrainService();
-
-        Optional<Ticket>ticketOpt= t.bookSeat(trainId, seatNo, loggedInUserId);
-        if(ticketOpt.isPresent()){
-            if (user.getTicketBooked() == null) {
-                user.setTicketBooked(new ArrayList<>());
-            }
-            user.getTicketBooked().add(ticketOpt.get());
-            for (int i = 0; i < userList.size(); i++) {
-                if (userList.get(i).getUserId() != null && userList.get(i).getUserId().equals(loggedInUserId)) {
-                    userList.set(i, user);
-                    break;
-                }
-            }
-            saveUserListToFile();
-        }
-        return ticketOpt;
-    }
 
 
     // Fully stateless coordination between TrainService and User data updates
-    public Optional<Ticket> bookSeatStateless(String trainId, Integer seatNo, String loggedInUserId) throws IOException {
-        TrainService trainService = new TrainService();
+    @Transactional
+    public Optional<Ticket> bookSeatStateless(Long trainId, Integer seatNo,Long userId) throws IOException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        Train train = trainRepository.findById(trainId)
+                .orElseThrow(() -> new RuntimeException("Train not found"));
 
-        Optional<Ticket> ticketOpt = trainService.bookSeat(trainId, seatNo, loggedInUserId);
+        Seat seat = seatRepository
+                .findByTrainTrainIdAndSeatNumber(trainId, seatNo)
+                .orElseThrow(() -> new RuntimeException("Seat not found"));
 
-        if (ticketOpt.isPresent()) {
-            // 2. Persist the updated seat grid to trains.json
-            trainService.saveTrainListToFile();
-
-            // 3. Find the user in our list and append the new ticket to their history
-            for (int i = 0; i < userList.size(); i++) {
-                if (userList.get(i).getUserId() != null && userList.get(i).getUserId().equals(loggedInUserId)) {
-                    User matchingUser = userList.get(i);
-                    if (matchingUser.getTicketBooked() == null) {
-                        matchingUser.setTicketBooked(new ArrayList<>());
-                    }
-                    matchingUser.getTicketBooked().add(ticketOpt.get());
-                    userList.set(i, matchingUser);
-                    break;
-                }
-            }
-            // 4. Persist the updated user profile to users.json
-            saveUserListToFile();
+        if (seat.isBooked()) {
+            return Optional.empty();
         }
-        return ticketOpt;
+
+        seat.setBooked(true);
+        seatRepository.save(seat);
+
+        Ticket ticket = new Ticket();
+
+        ticket.setUser(user);
+        ticket.setTrain(train);
+
+        ticket.setSource(train.getStations().getFirst());
+
+        ticket.setDestination(
+                train.getStations().getLast());
+
+        ticket.setDateOfTravel(new Date());
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+
+        return Optional.of(savedTicket);
     }
 
 

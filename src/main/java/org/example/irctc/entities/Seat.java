@@ -22,6 +22,7 @@ public class Seat {
 
     private boolean booked;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "train_id")
     private Train train;
 }

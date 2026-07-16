@@ -19,9 +19,9 @@ import java.util.List;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    @Column(name = "user_id")
-    private String userId;
+    private Long userId;
 
     private String name;
 
@@ -34,7 +34,18 @@ public class User {
 
     @OneToMany(mappedBy ="user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ticket> ticketBooked=new ArrayList<>();
+    public User(String name,
+                String email,
+                String password,
+                String hashedPassword,
+                List<Ticket> ticketBooked) {
 
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.hashedPassword = hashedPassword;
+        this.ticketBooked = ticketBooked;
+    }
 
 //
 //

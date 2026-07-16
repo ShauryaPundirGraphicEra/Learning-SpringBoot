@@ -1,6 +1,7 @@
 package org.example.irctc.controllers;
 
 
+import lombok.RequiredArgsConstructor;
 import org.example.irctc.dto.AuthResponse;
 import org.example.irctc.dto.LoginRequest;
 import org.example.irctc.entities.Ticket;
@@ -10,6 +11,7 @@ import org.example.irctc.exception.UserFoundException;
 import org.example.irctc.services.UserBookingServices;
 import org.example.irctc.util.JwtUtil;
 import org.example.irctc.util.UserServiceUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.example.irctc.services.UserBookingServices;
@@ -23,17 +25,12 @@ import java.util.UUID;
 
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("api/users")
 public class UserController {
-    private final  UserBookingServices userBookingServices ;
-    public UserController(){
-        try {
-            this.userBookingServices=new UserBookingServices();
-        } catch (IOException e) {
-            System.out.println("Failed to initialize user booking services");
-            throw new RuntimeException("Fatal: Failed to initialize user booking services", e);
-        }
-    }
+    @Autowired
+    private final UserBookingServices userBookingServices ;
+
     @PostMapping("/signup")
     public ResponseEntity<String>userSignup(@RequestBody SignupRequest signupRequest){
         String name=signupRequest.getName();
@@ -64,8 +61,9 @@ public class UserController {
               //  userBookingServices = new UserBookingServices(loggedInUser.get());
                 User user = loggedInUser.get();
                 System.out.println(" Login successful! Welcome back.");
-                String accessToken = JwtUtil.generateAccessToken(user.getUserId(), user.getName());
-                String refreshToken = JwtUtil.generateRefreshToken(user.getUserId());
+                String userIdStr = String.valueOf(user.getUserId());
+                String accessToken = JwtUtil.generateAccessToken(userIdStr, user.getName());
+                String refreshToken = JwtUtil.generateRefreshToken(userIdStr);
                 return ResponseEntity.ok(new AuthResponse(accessToken,refreshToken,"Login successful!!"));
                } else {
                 System.out.println(" Invalid username or password.");
@@ -79,7 +77,7 @@ public class UserController {
     }
 
     @GetMapping("/bookings")
-    public ResponseEntity<?>getBookings(@RequestAttribute("userId") String userId) {
+    public ResponseEntity<?>getBookings(@RequestAttribute("userId") Long userId) {
        try {
            List<Ticket> userBookings = userBookingServices.fetchBookingsByUserId(userId);
         return ResponseEntity.ok(userBookings);
@@ -89,8 +87,8 @@ public class UserController {
     }
     //DELETE http://localhost:8080/api/users/bookings/{ticketId}
     @DeleteMapping("bookings/{ticketId}")
-    public ResponseEntity<String>cancelUserBookings(@PathVariable String ticketId,@RequestAttribute("userId") String userId){
-        Boolean isCancelled = userBookingServices.cancelBookingStateless(ticketId, userId);
+    public ResponseEntity<String>cancelUserBookings(@PathVariable Long ticketId,@RequestAttribute("userId") Long userId){
+        Boolean isCancelled = userBookingServices.cancelBookingStateless((long)ticketId, userId);
         if (isCancelled) {
             return ResponseEntity.ok("Booking cancelled successfully!");
         } else {
