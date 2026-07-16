@@ -87,16 +87,15 @@ public class UserController {
     }
     //DELETE http://localhost:8080/api/users/bookings/{ticketId}
     @DeleteMapping("bookings/{ticketId}")
-    public ResponseEntity<String>cancelUserBookings(@PathVariable Long ticketId,@RequestAttribute("userId") Long userId){
-        Boolean isCancelled = userBookingServices.cancelBookingStateless((long)ticketId, userId);
+    public ResponseEntity<String> cancelUserBookings(@PathVariable String ticketId, @RequestAttribute("userId") String userId) {
+        Long longTicketId = Long.parseLong(ticketId);
+        Long longUserId = Long.parseLong(userId);
+        Boolean isCancelled = userBookingServices.cancelBookingStateless(longTicketId,longUserId);
         if (isCancelled) {
             return ResponseEntity.ok("Booking cancelled successfully!");
         } else {
             return ResponseEntity.badRequest().body("Cancellation failed. Invalid Ticket ID or ownership mismatch.");
         }
     }
-
-
-
 
 }
